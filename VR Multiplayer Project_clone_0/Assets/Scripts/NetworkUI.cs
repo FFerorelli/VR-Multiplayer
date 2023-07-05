@@ -9,12 +9,13 @@ public class NetworkUI : MonoBehaviour
     public Button hostButton;
     public Button serverButtton;
     public Button clientButton;
+    public string joinCode;
     // Start is called before the first frame update
     void Start()
     {
-        hostButton.onClick.AddListener(() => NetworkManager.Singleton.StartHost());
-        serverButtton.onClick.AddListener(() => NetworkManager.Singleton.StartServer());
-        clientButton.onClick.AddListener(() => NetworkManager.Singleton.StartClient());
+        hostButton.onClick.AddListener(() => RelayManager.Instance.CreateRelayGame(10));
+       // serverButtton.onClick.AddListener(() => NetworkManager.Singleton.StartServer());
+        clientButton.onClick.AddListener(() => RelayManager.Instance.JoinRelayGame(joinCode));
     }
 
     // Update is called once per frame
