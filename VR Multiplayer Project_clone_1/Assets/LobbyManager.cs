@@ -3,10 +3,13 @@ using System.Collections.Generic;
 using UnityEngine;
 using Unity.Services.Lobbies;
 using Unity.Services.Lobbies.Models;
+using Unity.Services.Authentication;
 
 public class LobbyManager : MonoBehaviour
 {
     public static LobbyManager Instance;
+    private Lobby currentLobby;
+    private float timer = 0;
 
     private void Awake()
     {
@@ -30,22 +33,22 @@ public class LobbyManager : MonoBehaviour
         DataObject dataObject = new DataObject(DataObject.VisibilityOptions.Public, joinCode);
         lobbyOptions.Data.Add("Join Code Key", dataObject);
 
-        await Lobbies.Instance.CreateLobbyAsync(lobbyData.lobbyName, lobbyData.maxPlayers, lobbyOptions);
+        currentLobby = await Lobbies.Instance.CreateLobbyAsync(lobbyData.lobbyName, lobbyData.maxPlayers, lobbyOptions);
 
     }
 
     public async void QuickJoinLobby()
     {
-        Lobby lobby = await Lobbies.Instance.QuickJoinLobbyAsync();
-        string relayJoinCode = lobby.Data["Join Code Key"].Value;
+        currentLobby = await Lobbies.Instance.QuickJoinLobbyAsync();
+        string relayJoinCode = currentLobby.Data["Join Code Key"].Value;
 
         RelayManager.Instance.JoinRelayGame(relayJoinCode);
     }
 
     public async void JoinLobby(string lobbyId)
     {
-        Lobby lobby = await Lobbies.Instance.JoinLobbyByIdAsync(lobbyId);
-        string relayJoinCode = lobby.Data["Join Code Key"].Value;
+        currentLobby = await Lobbies.Instance.JoinLobbyByIdAsync(lobbyId);
+        string relayJoinCode = currentLobby.Data["Join Code Key"].Value;
 
         RelayManager.Instance.JoinRelayGame(relayJoinCode);
     }
@@ -59,6 +62,16 @@ public class LobbyManager : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        
+        if (timer > 15)
+        {
+            timer -= 15;
+
+            if (currentLobby != null && currentLobby.HostId == AuthenticationService.Instance.PlayerId)
+            {
+                 LobbyService.Instance.SendHeartbeatPingAsync(currentLobby.Id);  
+            }
+        }
+
+        timer += Time.deltaTime;
     }
 }
