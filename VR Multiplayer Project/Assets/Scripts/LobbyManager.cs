@@ -9,7 +9,13 @@ public class LobbyManager : MonoBehaviour
 {
     public static LobbyManager Instance;
     private Lobby currentLobby;
-    private float timer = 0;
+    private float heartBeatTimer = 0;
+    private float updateLobbyTimer = 0;
+
+    private bool hasPlayerDataToUpdate = false;
+    private Dictionary<string, PlayerDataObject> newPlayerData;
+
+    public Lobby CurrentLobby { get => currentLobby; }
 
     private void Awake()
     {
@@ -20,6 +26,19 @@ public class LobbyManager : MonoBehaviour
     {
         public string lobbyName;
         public int maxPlayers;
+    }
+
+    public async void UpdatePlayer(Dictionary<string, PlayerDataObject> data)
+    {
+        UpdatePlayerOptions updateOptions = new UpdatePlayerOptions();
+        updateOptions.Data = data;
+        currentLobby = await LobbyService.Instance.UpdatePlayerAsync(currentLobby.Id, AuthenticationService.Instance.PlayerId, updateOptions);
+    }
+
+    public void UpdatePlayerData(Dictionary<string, PlayerDataObject> data)
+    {
+        newPlayerData = data;
+        hasPlayerDataToUpdate = true;
     }
 
     public async void CreateLobby(LobbyData lobbyData)
@@ -60,18 +79,38 @@ public class LobbyManager : MonoBehaviour
     }
 
     // Update is called once per frame
-    void Update()
+    async void Update()
     {
-        if (timer > 15)
+        if (heartBeatTimer > 15)
         {
-            timer -= 15;
+            heartBeatTimer -= 15;
 
             if (currentLobby != null && currentLobby.HostId == AuthenticationService.Instance.PlayerId)
             {
-                 LobbyService.Instance.SendHeartbeatPingAsync(currentLobby.Id);  
+                await LobbyService.Instance.SendHeartbeatPingAsync(currentLobby.Id);  
             }
         }
 
-        timer += Time.deltaTime;
+        heartBeatTimer += Time.deltaTime;
+
+        if (updateLobbyTimer > 1.5f)
+        {
+            updateLobbyTimer -= 1.5f;
+
+            if (currentLobby != null)
+            {
+                if (hasPlayerDataToUpdate)
+                {
+                    UpdatePlayer(newPlayerData);
+                    hasPlayerDataToUpdate = false;
+                }
+                else
+                {
+                    currentLobby = await LobbyService.Instance.GetLobbyAsync(currentLobby.Id);
+                }
+            }
+
+            updateLobbyTimer += Time.deltaTime;
+        }
     }
 }
