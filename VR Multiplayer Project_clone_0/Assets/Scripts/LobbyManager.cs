@@ -35,6 +35,11 @@ public class LobbyManager : MonoBehaviour
         currentLobby = await LobbyService.Instance.UpdatePlayerAsync(currentLobby.Id, AuthenticationService.Instance.PlayerId, updateOptions);
     }
 
+    public async void LockLobby()
+    {
+        currentLobby = await Lobbies.Instance.UpdateLobbyAsync(currentLobby.Id, new UpdateLobbyOptions { IsLocked = true });
+    }
+
     public void UpdatePlayerData(Dictionary<string, PlayerDataObject> data)
     {
         newPlayerData = data;

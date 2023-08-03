@@ -62,6 +62,17 @@ public class InsideLobbyUI : MonoBehaviour
 
         int numberOfReady = GetNumberOfReady();
         playerInside.text = numberOfReady + "/" + currentLobby.Players.Count;
+
+        if (currentLobby.HostId == AuthenticationService.Instance.PlayerId)
+        {
+            if (numberOfReady ==  currentLobby.Players.Count)
+            {
+                //Prevent to join a lobby already started
+                LobbyManager.Instance.LockLobby();
+                 
+                NetworkSceneTransition.Instance.LoadSceneForEveryBody("Default");
+            }
+        }
     }
 
     public int GetNumberOfReady()
