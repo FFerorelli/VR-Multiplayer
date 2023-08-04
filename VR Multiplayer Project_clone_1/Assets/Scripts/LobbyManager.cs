@@ -1,17 +1,22 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Events;
 using Unity.Services.Lobbies;
 using Unity.Services.Lobbies.Models;
 using Unity.Services.Authentication;
 using Unity.Netcode;
 
+
 public class LobbyManager : MonoBehaviour
 {
     public static LobbyManager Instance;
-    private Lobby currentLobby;
     private float heartBeatTimer = 0;
     private float updateLobbyTimer = 0;
+    private Lobby currentLobby;
+
+    public UnityEvent OnStartJoinLobby;
+    public UnityEvent OnFailedJoinLoby;
 
     private bool hasPlayerDataToUpdate = false;
     private Dictionary<string, PlayerDataObject> newPlayerData;
@@ -65,40 +70,71 @@ public class LobbyManager : MonoBehaviour
 
     public async void CreateLobby(LobbyData lobbyData)
     {
-        CreateLobbyOptions lobbyOptions = new CreateLobbyOptions();
-        lobbyOptions.IsPrivate = false;
-        lobbyOptions.Data = new Dictionary<string, DataObject>();
+        OnStartJoinLobby.Invoke();
 
-        string joinCode = await RelayManager.Instance.CreateRelayGame(lobbyData.maxPlayers);
+        try
+        {
+            CreateLobbyOptions lobbyOptions = new CreateLobbyOptions();
+            lobbyOptions.IsPrivate = false;
+            lobbyOptions.Data = new Dictionary<string, DataObject>();
 
-        DataObject dataObject = new DataObject(DataObject.VisibilityOptions.Public, joinCode);
-        lobbyOptions.Data.Add("Join Code Key", dataObject);
-        
-        DataObject gameDataObject = new DataObject(DataObject.VisibilityOptions.Public, lobbyData.gameMode);
-        lobbyOptions.Data.Add("Game Mode", gameDataObject);
+            string joinCode = await RelayManager.Instance.CreateRelayGame(lobbyData.maxPlayers);
 
-        lobbyOptions.Data.Add("Join Code Key", dataObject);
+            DataObject dataObject = new DataObject(DataObject.VisibilityOptions.Public, joinCode);
+            lobbyOptions.Data.Add("Join Code Key", dataObject);
 
+            DataObject gameDataObject = new DataObject(DataObject.VisibilityOptions.Public, lobbyData.gameMode);
+            lobbyOptions.Data.Add("Game Mode", gameDataObject);
 
+            lobbyOptions.Data.Add("Join Code Key", dataObject);
 
-        currentLobby = await Lobbies.Instance.CreateLobbyAsync(lobbyData.lobbyName, lobbyData.maxPlayers, lobbyOptions);
+            currentLobby = await Lobbies.Instance.CreateLobbyAsync(lobbyData.lobbyName, lobbyData.maxPlayers, lobbyOptions);
+        }
+
+        catch (System.Exception e)
+        {
+            Debug.Log(e.ToString());
+            OnFailedJoinLoby.Invoke();
+        }
 
     }
 
     public async void QuickJoinLobby()
     {
-        currentLobby = await Lobbies.Instance.QuickJoinLobbyAsync();
-        string relayJoinCode = currentLobby.Data["Join Code Key"].Value;
+        OnStartJoinLobby.Invoke();
 
-        RelayManager.Instance.JoinRelayGame(relayJoinCode);
+        try
+        {
+            currentLobby = await Lobbies.Instance.QuickJoinLobbyAsync();
+            string relayJoinCode = currentLobby.Data["Join Code Key"].Value;
+
+            RelayManager.Instance.JoinRelayGame(relayJoinCode);
+        }
+
+        catch (System.Exception e)
+        {
+            Debug.Log(e.ToString());
+            OnFailedJoinLoby.Invoke();
+        }
     }
 
     public async void JoinLobby(string lobbyId)
     {
-        currentLobby = await Lobbies.Instance.JoinLobbyByIdAsync(lobbyId);
-        string relayJoinCode = currentLobby.Data["Join Code Key"].Value;
+        OnStartJoinLobby.Invoke();
 
-        RelayManager.Instance.JoinRelayGame(relayJoinCode);
+        try
+        {
+            currentLobby = await Lobbies.Instance.JoinLobbyByIdAsync(lobbyId);
+            string relayJoinCode = currentLobby.Data["Join Code Key"].Value;
+
+            RelayManager.Instance.JoinRelayGame(relayJoinCode);
+        }
+
+        catch (System.Exception e)
+        {
+            Debug.Log(e.ToString());
+            OnFailedJoinLoby.Invoke();
+        }
     }
 
     // Start is called before the first frame update

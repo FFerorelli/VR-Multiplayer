@@ -7,6 +7,7 @@ using Unity.Netcode;
 public class LobbyUI : MonoBehaviour
 {
     public GameObject authentication;
+    public GameObject loading;
     public GameObject lobbyMenu;
     public GameObject createLobby;
     public GameObject lobbyList;
@@ -18,7 +19,7 @@ public class LobbyUI : MonoBehaviour
 
     public void UIEnabler(int index)
     {
-        GameObject[] uiElements = new GameObject[] { lobbyMenu, createLobby, lobbyList , authentication , insideLobby  };
+        GameObject[] uiElements = new GameObject[] { lobbyMenu, createLobby, lobbyList , authentication , insideLobby, loading };
 
         for (int i = 0; i < uiElements.Length; i++)
         {
@@ -36,7 +37,10 @@ public class LobbyUI : MonoBehaviour
         lobbyListButton.onClick.AddListener(() => UIEnabler(2));
 
         NetworkManager.Singleton.OnClientConnectedCallback += OnClientConnected;
-        NetworkManager.Singleton.OnClientDisconnectCallback += OnClientDisconnectCallback; ;
+        NetworkManager.Singleton.OnClientDisconnectCallback += OnClientDisconnectCallback;
+
+        LobbyManager.Instance.OnStartJoinLobby.AddListener(() => UIEnabler(5));
+        LobbyManager.Instance.OnFailedJoinLoby.AddListener(() => UIEnabler(0));
     }
 
     private void OnClientDisconnectCallback(ulong obj)

@@ -33,8 +33,10 @@ public class RelayManager : MonoBehaviour
 
         Debug.Log("The join code is : " + joinCode);
 
-        RelayServerData serverData = new RelayServerData(allocation, "dtls");
-        transport.SetRelayServerData(serverData);
+        //RelayServerData serverData = new RelayServerData(allocation, "dtls");
+        //transport.SetRelayServerData(serverData);
+
+        transport.SetHostRelayData(allocation.RelayServer.IpV4, (ushort)allocation.RelayServer.Port, allocation.AllocationIdBytes, allocation.Key, allocation.ConnectionData);
 
         NetworkManager.Singleton.StartHost();
 
@@ -45,8 +47,10 @@ public class RelayManager : MonoBehaviour
     {
         JoinAllocation allocation = await RelayService.Instance.JoinAllocationAsync(joinCode);
 
-        RelayServerData serverData = new RelayServerData(allocation, "dtls");
-        transport.SetRelayServerData(serverData);
+        //RelayServerData serverData = new RelayServerData(allocation, "dtls");
+        //transport.SetRelayServerData(serverData);
+
+        transport.SetClientRelayData(allocation.RelayServer.IpV4, (ushort)allocation.RelayServer.Port, allocation.AllocationIdBytes, allocation.Key, allocation.ConnectionData, allocation.HostConnectionData);
 
         NetworkManager.Singleton.StartClient();
     }

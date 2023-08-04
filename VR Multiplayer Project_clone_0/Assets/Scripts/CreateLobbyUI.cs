@@ -16,6 +16,7 @@ public class CreateLobbyUI : MonoBehaviour
     {
         createLobbyButton.onClick.AddListener(CreateLobbyFromUI);
     }
+   
 
     public void CreateLobbyFromUI()
     {
@@ -29,6 +30,6 @@ public class CreateLobbyUI : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        
+        createLobbyButton.gameObject.SetActive(nameInputField.text != "");
     }
 }
