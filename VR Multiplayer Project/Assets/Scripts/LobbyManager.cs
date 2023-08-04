@@ -4,6 +4,7 @@ using UnityEngine;
 using Unity.Services.Lobbies;
 using Unity.Services.Lobbies.Models;
 using Unity.Services.Authentication;
+using Unity.Netcode;
 
 public class LobbyManager : MonoBehaviour
 {
@@ -39,6 +40,21 @@ public class LobbyManager : MonoBehaviour
     public async void LockLobby()
     {
         currentLobby = await Lobbies.Instance.UpdateLobbyAsync(currentLobby.Id, new UpdateLobbyOptions { IsLocked = true });
+    }
+
+    public async void LeaveLobbyAsync()
+    {
+        if (NetworkManager.Singleton)
+        {
+            NetworkManager.Singleton.Shutdown();
+        }
+
+        if (currentLobby != null)
+        {
+            string id = currentLobby.Id;
+            currentLobby = null;
+            await Lobbies.Instance.RemovePlayerAsync(id, AuthenticationService.Instance.PlayerId);
+        }
     }
 
     public void UpdatePlayerData(Dictionary<string, PlayerDataObject> data)

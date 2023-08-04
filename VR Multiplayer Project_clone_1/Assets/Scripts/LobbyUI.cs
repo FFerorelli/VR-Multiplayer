@@ -36,6 +36,21 @@ public class LobbyUI : MonoBehaviour
         lobbyListButton.onClick.AddListener(() => UIEnabler(2));
 
         NetworkManager.Singleton.OnClientConnectedCallback += OnClientConnected;
+        NetworkManager.Singleton.OnClientDisconnectCallback += OnClientDisconnectCallback; ;
+    }
+
+    private void OnClientDisconnectCallback(ulong obj)
+    {
+        if (!NetworkManager.Singleton.IsServer)
+        {
+            LeaveLobbyUI();
+        }
+    }
+
+    public void LeaveLobbyUI()
+    {
+        UIEnabler(0);
+        LobbyManager.Instance.LeaveLobbyAsync();
     }
 
     private void OnClientConnected(ulong obj)
