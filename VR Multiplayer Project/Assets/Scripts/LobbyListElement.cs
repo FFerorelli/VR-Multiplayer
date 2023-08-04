@@ -11,13 +11,14 @@ public class LobbyListElement : MonoBehaviour
     public Button joinButton;
     public TextMeshProUGUI lobbyName;
     public TextMeshProUGUI playersIn;
+    public TextMeshProUGUI gameMode;
     private string lobbyId;
 
     public void Initialize(Lobby lobby)
     {
         lobbyName.text = lobby.Name;
         playersIn.text = lobby.Players.Count + "/" + lobby.MaxPlayers;
-
+        gameMode.text = lobby.Data["Game Mode"].Value;
         lobbyId = lobby.Id;
     }
 

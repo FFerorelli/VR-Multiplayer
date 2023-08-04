@@ -26,6 +26,7 @@ public class LobbyManager : MonoBehaviour
     {
         public string lobbyName;
         public int maxPlayers;
+        public string gameMode;
     }
 
     public async void UpdatePlayer(Dictionary<string, PlayerDataObject> data)
@@ -56,6 +57,13 @@ public class LobbyManager : MonoBehaviour
 
         DataObject dataObject = new DataObject(DataObject.VisibilityOptions.Public, joinCode);
         lobbyOptions.Data.Add("Join Code Key", dataObject);
+        
+        DataObject gameDataObject = new DataObject(DataObject.VisibilityOptions.Public, lobbyData.gameMode);
+        lobbyOptions.Data.Add("Game Mode", gameDataObject);
+
+        lobbyOptions.Data.Add("Join Code Key", dataObject);
+
+
 
         currentLobby = await Lobbies.Instance.CreateLobbyAsync(lobbyData.lobbyName, lobbyData.maxPlayers, lobbyOptions);
 

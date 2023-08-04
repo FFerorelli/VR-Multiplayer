@@ -70,7 +70,7 @@ public class InsideLobbyUI : MonoBehaviour
                 //Prevent to join a lobby already started
                 LobbyManager.Instance.LockLobby();
                  
-                NetworkSceneTransition.Instance.LoadSceneForEveryBody("Default");
+                NetworkSceneTransition.Instance.LoadSceneForEveryBody(currentLobby.Data["Game Mode"].Value);
             }
         }
     }
