@@ -1,23 +1,36 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using Unity.Netcode;
+using Unity.Collections;
 
-public class NetworkAvatar : MonoBehaviour
+public class NetworkAvatar : NetworkBehaviour
 {
+    public GameObject head;
+    public GameObject namePlate;
+
     public GameObject[] headParts;
     public GameObject[] bodyParts;
     public Renderer[] skinParts;
     public Gradient skinGradient;
     public TMPro.TextMeshPro playerName;
 
-    public NetworkAvatarData networkAvatarData;
+    public NetworkVariable<NetworkAvatarData> networkAvatarData = new NetworkVariable<NetworkAvatarData>(new NetworkAvatarData(), NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Owner);
 
-    public struct NetworkAvatarData
+    public struct NetworkAvatarData : INetworkSerializable
     {
         public int headIndex;
         public int bodyIndex;
         public float skinColor;
-        public string avatarName;
+        public FixedString128Bytes avatarName;
+
+        public void NetworkSerialize<T>(BufferSerializer<T> serializer) where T : IReaderWriter
+        {
+            serializer.SerializeValue(ref headIndex);
+            serializer.SerializeValue(ref bodyIndex);
+            serializer.SerializeValue(ref skinColor);
+            serializer.SerializeValue(ref avatarName);
+        }
     }
 
     public NetworkAvatarData GenereteRandom()
@@ -26,7 +39,7 @@ public class NetworkAvatar : MonoBehaviour
         int randomBodyIndex = Random.Range(0, bodyParts.Length);
         float randomSkinColor = Random.Range((float)0, (float)1);
 
-        string avatarName = "Random Avatar";
+        string avatarName = "Player" + NetworkManager.Singleton.LocalClientId.ToString();
 
         NetworkAvatarData randomData = new NetworkAvatarData
         {
@@ -59,16 +72,20 @@ public class NetworkAvatar : MonoBehaviour
         playerName.text = newData.avatarName.ToString();
     }
 
-    // Start is called before the first frame update
-    void Start()
+   public override void OnNetworkSpawn()
     {
-        networkAvatarData = GenereteRandom();
-        UpdateAvatarFromData(networkAvatarData);
+        if (IsOwner)
+        {
+             networkAvatarData.Value = GenereteRandom();
+             head.SetActive(false);
+             namePlate.SetActive(false);
+        }
+
+        UpdateAvatarFromData(networkAvatarData.Value);
+
+        networkAvatarData.OnValueChanged += (x, y) => UpdateAvatarFromData(y);
     }
 
-    // Update is called once per frame
-    void Update()
-    {
-        
-    }
+
+
 }

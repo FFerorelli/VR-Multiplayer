@@ -1140,6 +1140,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4f3787ce953f0af4b94043fdb7f47253, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  head: {fileID: 3921100714833038843}
+  namePlate: {fileID: 2006365352291763186}
   headParts:
   - {fileID: 8185881104309148350}
   - {fileID: 3407086677061386556}
