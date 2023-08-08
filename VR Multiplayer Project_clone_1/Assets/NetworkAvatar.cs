@@ -79,6 +79,8 @@ public class NetworkAvatar : NetworkBehaviour
              networkAvatarData.Value = GenereteRandom();
              head.layer = 3;
              namePlate.SetActive(false);
+
+            AvatarSelectionUI.Singleton.Initialize(this);
         }
 
         UpdateAvatarFromData(networkAvatarData.Value);
