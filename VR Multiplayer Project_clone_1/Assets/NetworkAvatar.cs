@@ -77,7 +77,7 @@ public class NetworkAvatar : NetworkBehaviour
         if (IsOwner)
         {
              networkAvatarData.Value = GenereteRandom();
-             head.SetActive(false);
+             head.layer = 3;
              namePlate.SetActive(false);
         }
 
